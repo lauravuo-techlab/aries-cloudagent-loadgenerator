@@ -20,6 +20,7 @@ package com.bka.ssi.generator.config
 
 import com.bka.ssi.generator.agents.acapy.AcaPyAriesClient
 import com.bka.ssi.generator.agents.acapy.AcaPyOkHttpInterceptor
+import com.bka.ssi.generator.agents.acapy.FindyAriesClient
 import com.bka.ssi.generator.application.logger.AriesClientLogger
 import com.bka.ssi.generator.application.logger.ErrorLogger
 import com.bka.ssi.generator.domain.services.IAriesClient
@@ -75,45 +76,47 @@ class AcaPyConfig(
         issuerVerifierAcaPyUrl: String,
         okHttpPublisher: AcaPyOkHttpInterceptor
     ): IAriesClient {
-        val issuerVerifierAcaPyClient =
-            buildAcaPyAriesClient(
-                okHttpPublisher,
-                issuerVerifierAcaPyUrl,
-                issuerVerifierAcaPyHttpTimeoutInSeconds,
-                issuerVerifierAcaPyApiKey,
-                null
-            )
+        // val issuerVerifierAcaPyClient =
+        //     buildAcaPyAriesClient(
+        //         okHttpPublisher,
+        //         issuerVerifierAcaPyUrl,
+        //         issuerVerifierAcaPyHttpTimeoutInSeconds,
+        //         issuerVerifierAcaPyApiKey,
+        //         null
+        //     )
 
-        return AcaPyAriesClient(issuerVerifierAcaPyClient, errorLogger, ariesClientLogger)
+        // return AcaPyAriesClient(issuerVerifierAcaPyClient, errorLogger, ariesClientLogger)
+        return FindyAriesClient(false, errorLogger)
     }
 
     private fun issuerVerifierClientWithMultitenancyEnabled(
         issuerVerifierAcaPyUrl: String,
         okHttpPublisher: AcaPyOkHttpInterceptor
     ): IAriesClient {
-        val baseWalletAriesClient =
-            buildAcaPyAriesClient(
-                okHttpPublisher,
-                issuerVerifierAcaPyUrl,
-                issuerVerifierAcaPyHttpTimeoutInSeconds,
-                issuerVerifierAcaPyApiKey,
-                null
-            )
+        // val baseWalletAriesClient =
+        //     buildAcaPyAriesClient(
+        //         okHttpPublisher,
+        //         issuerVerifierAcaPyUrl,
+        //         issuerVerifierAcaPyHttpTimeoutInSeconds,
+        //         issuerVerifierAcaPyApiKey,
+        //         null
+        //     )
 
-        val subWalletToken = createNewSubWallet(baseWalletAriesClient)
+        // val subWalletToken = createNewSubWallet(baseWalletAriesClient)
 
-        val subWalletIssuerVerifierAcaPyClient =
-            buildAcaPyAriesClient(
-                okHttpPublisher,
-                issuerVerifierAcaPyUrl,
-                issuerVerifierAcaPyHttpTimeoutInSeconds,
-                issuerVerifierAcaPyApiKey,
-                subWalletToken
-            )
+        // val subWalletIssuerVerifierAcaPyClient =
+        //     buildAcaPyAriesClient(
+        //         okHttpPublisher,
+        //         issuerVerifierAcaPyUrl,
+        //         issuerVerifierAcaPyHttpTimeoutInSeconds,
+        //         issuerVerifierAcaPyApiKey,
+        //         subWalletToken
+        //     )
 
-        createAndRegisterNewPublicDid(subWalletIssuerVerifierAcaPyClient)
+        // createAndRegisterNewPublicDid(subWalletIssuerVerifierAcaPyClient)
 
-        return AcaPyAriesClient(subWalletIssuerVerifierAcaPyClient, errorLogger, ariesClientLogger)
+        // return AcaPyAriesClient(subWalletIssuerVerifierAcaPyClient, errorLogger, ariesClientLogger)
+        return FindyAriesClient(false, errorLogger)
     }
 
     private fun createNewSubWallet(baseWalletAriesClient: AriesClient): String {
@@ -210,11 +213,14 @@ class AcaPyConfig(
         logger.info("Using ${holderAcaPyUrls.size} Holder Agents")
         holderAcaPyUrls.forEach {
         logger.info("Using Holder Agent: $it")
-            val holderAcaPyClient =
-                buildAcaPyAriesClient(okHttpPublisher, it, holderAcapyHttpTimeoutInSeconds, holderAcaPyApiKey, null)
+            // val holderAcaPyClient =
+            //     buildAcaPyAriesClient(okHttpPublisher, it, holderAcapyHttpTimeoutInSeconds, holderAcaPyApiKey, null)
 
+            // holderAcaPyClients.add(
+            //     AcaPyAriesClient(holderAcaPyClient, errorLogger, ariesClientLogger)
+            // )
             holderAcaPyClients.add(
-                AcaPyAriesClient(holderAcaPyClient, errorLogger, ariesClientLogger)
+                 FindyAriesClient(true, errorLogger)
             )
         }
 

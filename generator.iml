@@ -34,7 +34,7 @@
           </option>
           <option name="pluginClasspaths">
             <array>
-              <option value="$KOTLIN_BUNDLED$/lib/allopen-compiler-plugin.jar" />
+              <option value="$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/allopen-compiler-plugin.jar" />
             </array>
           </option>
           <option name="errors">
@@ -53,7 +53,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/kotlin" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="11" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-web:2.6.2" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:2.6.2" level="project" />
@@ -162,5 +162,35 @@
     <orderEntry type="library" scope="RUNTIME" name="Maven: io.prometheus:simpleclient_tracer_otel:0.12.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: io.prometheus:simpleclient_tracer_common:0.12.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: io.prometheus:simpleclient_tracer_otel_agent:0.12.0" level="project" />
+    <orderEntry type="library" name="Maven: org.findy_network:findy-common-kt-client:0.0.9" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.grpc:grpc-netty:1.37.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.grpc:grpc-core:1.37.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: com.google.android:annotations:4.1.1.4" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-codec-http2:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-common:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-buffer:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-transport:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-resolver:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-codec:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-handler:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-tcnative-classes:2.0.46.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-codec-http:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-handler-proxy:4.1.72.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-codec-socks:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: com.google.errorprone:error_prone_annotations:2.4.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.perfmark:perfmark-api:0.23.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.codehaus.mojo:animal-sniffer-annotations:1.19" level="project" />
+    <orderEntry type="library" name="Maven: org.findy_network:findy-common-kt-stub:0.0.9" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.5.2" level="project" />
+    <orderEntry type="library" name="Maven: io.grpc:grpc-protobuf:1.37.0" level="project" />
+    <orderEntry type="library" name="Maven: io.grpc:grpc-api:1.37.0" level="project" />
+    <orderEntry type="library" name="Maven: io.grpc:grpc-context:1.37.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:3.12.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.api.grpc:proto-google-common-protos:2.0.1" level="project" />
+    <orderEntry type="library" name="Maven: io.grpc:grpc-protobuf-lite:1.37.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java-util:3.15.8" level="project" />
+    <orderEntry type="library" name="Maven: io.grpc:grpc-kotlin-stub:1.1.0" level="project" />
+    <orderEntry type="library" name="Maven: io.grpc:grpc-stub:1.36.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2" level="project" />
   </component>
 </module>

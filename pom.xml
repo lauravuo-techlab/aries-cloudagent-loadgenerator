@@ -17,6 +17,7 @@
 		<java.version>11</java.version>
 		<kotlin.version>1.6.10</kotlin.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -99,6 +100,16 @@
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.findy_network</groupId>
+			<artifactId>findy-common-kt-client</artifactId>
+			<version>0.0.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.findy_network</groupId>
+			<artifactId>findy-common-kt-stub</artifactId>
+			<version>0.0.9</version>
 		</dependency>
 	</dependencies>
 

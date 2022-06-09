@@ -16,11 +16,12 @@ class AcaPyPostgresWallet(
     var logger: Logger = LoggerFactory.getLogger(AcaPyPostgresWallet::class.java)
 
     override fun walletDatabaseSizeInBytes(): Int? {
-        val size = jdbcTemplate.queryForObject(
-            "SELECT PG_DATABASE_SIZE('$walletDbName')",
-            Int::class.java
-        )
+        // val size = jdbcTemplate.queryForObject(
+        //     "SELECT PG_DATABASE_SIZE('$walletDbName')",
+        //     Int::class.java
+        // )
 
-        return size
+        // return size
+        return 0
     }
 }

@@ -170,3 +170,10 @@ buildNumber.properties
 .env
 
 # End of https://www.toptal.com/developers/gitignore/api/maven
+
+settings.xml
+.DS_Store
+.data
+.env.modified
+setup/agents/conf/genesis.txt
+setup/load-generator/cert

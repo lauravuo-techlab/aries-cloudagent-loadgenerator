@@ -1,12 +1,14 @@
 package com.bka.ssi.generator.domain.services
 
+import com.bka.ssi.generator.agents.acapy.AcaPyPublisher
 import com.bka.ssi.generator.domain.objects.*
 
 interface IAriesClient {
     fun getPublicDid(): String?
 
     fun createSchemaAndCredentialDefinition(
-        schemaDo: SchemaDo, revocable: Boolean,
+        schemaDo: SchemaDo,
+        revocable: Boolean,
         revocationRegistrySize: Int
     ): CredentialDefinitionDo
 
@@ -30,6 +32,11 @@ interface IAriesClient {
         comment: ProofExchangeCommentDo
     )
 
-    fun createOobProofRequest(proofRequestDo: ProofRequestDo, checkNonRevoked: Boolean): OobProofRequestDo
+    fun createOobProofRequest(
+        proofRequestDo: ProofRequestDo,
+        checkNonRevoked: Boolean
+    ): OobProofRequestDo
     fun receiveOobProofRequest(oobProofRequestDo: OobProofRequestDo)
+
+    fun setPublisher(publisher: AcaPyPublisher)
 }

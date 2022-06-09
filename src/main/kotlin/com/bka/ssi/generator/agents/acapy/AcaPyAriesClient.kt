@@ -234,4 +234,7 @@ class AcaPyAriesClient(
         errorLogger.reportAriesClientError("AcaPyAriesClient.receiveOobProofRequest: Receiving an OOB Proof Request is not implemented yet.")
         throw NotImplementedError("Receiving an OOB Proof Request is not implemented yet.")
     }
+
+    override fun setPublisher(publisher: AcaPyPublisher) {
+    }
 }

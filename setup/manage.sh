@@ -133,18 +133,24 @@ function startIndyNetwork() {
 function startAgents() {
   configureMultitenancyFlags
 
-  docker-compose -f ./agents/docker-compose-agents.yml up -d issuer-verifier-acapy
+  curl http://localhost:9000/genesis > ./agents/conf/genesis.txt
+
+  #docker-compose -f ./agents/docker-compose-agents.yml up -d issuer-verifier-acapy
+  docker-compose -f ./agents/docker-compose-agents-findy.yml up -d issuer-verifier-acapy
 
   echo "Provisioning AcaPys... (sleeping 15 seconds)"
   sleep 15
 
+
   echo "Starting all AcaPy related docker containers ..."
-  docker-compose -f ./agents/docker-compose-agents.yml up -d --scale issuer-verifier-acapy=$NUMBER_OF_ISSUER_VERIFIER_ACAPY_INSTANCES --scale holder-acapy=$NUMBER_OF_HOLDER_ACAPY_INSTANCES
+  #docker-compose -f ./agents/docker-compose-agents.yml up -d --scale issuer-verifier-acapy=$NUMBER_OF_ISSUER_VERIFIER_ACAPY_INSTANCES --scale holder-acapy=$NUMBER_OF_HOLDER_ACAPY_INSTANCES
+  docker-compose -f ./agents/docker-compose-agents-findy.yml up -d --scale issuer-verifier-acapy=$NUMBER_OF_ISSUER_VERIFIER_ACAPY_INSTANCES --scale holder-acapy=$NUMBER_OF_HOLDER_ACAPY_INSTANCES
 
   echo "Waiting for all the agents to start... (sleeping 15 seconds)"
   sleep 15
 
   export HOLDER_ACAPY_URLS="http://`docker network inspect aries-load-test | jq '.[].Containers |  to_entries[].value | select(.Name|test("^agents_holder-acapy_.")) | .IPv4Address' -r | paste -sd, - | sed 's/\/[0-9]*/:10010/g' | sed 's/,/, http:\/\//g'`"
+  echo $HOLDER_ACAPY_URLS
 }
 
 function startPostgresSingleInstance() {
@@ -175,6 +181,9 @@ function buildAcaPyDebugImage() {
 }
 
 function startAll() {
+  cp ~/.m2/settings.xml settings.xml
+  cp -R ./agents/cert ./load-generator/
+
   if [ "${SYSTEM_LEDGER}" = true ]; then
     startIndyNetwork
   fi
@@ -238,13 +247,16 @@ function downAll() {
   docker-compose -f ./load-generator/docker-compose-load-generator.yml down -v
 
   echo "Stopping and removing any running AcaPy containers as well as volumes ..."
-  docker-compose -f ./agents/docker-compose-agents.yml down -v
+  #docker-compose -f ./agents/docker-compose-agents.yml down -v
+  docker-compose -f ./agents/docker-compose-agents-findy.yml down -v
 
   echo "Stopping and removing any Wallet-DB containers as well as volumes ..."
   docker-compose -f ./agents/docker-compose-issuer-verifier-walletdb.yml down -v
 
   echo "Stopping and removing dashboard and logging containers as well as volumes ..."
   docker-compose -f ./dashboard/docker-compose-dashboards.yml down -v
+
+  rm -rf ./agents/.data
 }
 
 case "${COMMAND}" in

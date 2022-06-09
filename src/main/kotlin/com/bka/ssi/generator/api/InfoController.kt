@@ -18,23 +18,38 @@
 
 package com.bka.ssi.generator.api
 
+import com.bka.ssi.generator.agents.acapy.AcaPyPublisher
 import com.bka.ssi.generator.domain.services.IAriesClient
 import io.swagger.annotations.Api
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import javax.annotation.PostConstruct
 
 @RestController()
 @Api(tags = ["info"])
 @RequestMapping("/info")
 class InfoController(
-    @Qualifier("IssuerVerifier") private val issuerVerifierAcaPy: IAriesClient
+    @Qualifier("IssuerVerifier") private val issuerVerifierAcaPy: IAriesClient,
+    @Qualifier("Holder") private val holderAriesClients: List<IAriesClient>,
 ) {
 
     var logger: Logger = LoggerFactory.getLogger(InfoController::class.java)
+
+    @Autowired
+    lateinit  var publisher: AcaPyPublisher
+
+    @PostConstruct
+    fun init() {
+        issuerVerifierAcaPy.setPublisher(publisher)
+        for (client in holderAriesClients) {
+            client.setPublisher(publisher)
+        }
+    }
 
     @GetMapping("/public-did")
     private fun getDid(): String? {
