@@ -13,12 +13,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.findy_network.findy_common_kt.Connection
-import org.findy_network.findy_common_kt.Notification
-import org.findy_network.findy_common_kt.ProofRequestAttribute
-import org.findy_network.findy_common_kt.Protocol
+import org.findy_network.findy_common_kt.*
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.connection.ConnectionState
+import org.hyperledger.aries.api.credentials.CredentialAttributes
+import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
+import org.hyperledger.aries.api.issue_credential_v1.V1CredentialExchange
+import org.hyperledger.aries.api.present_proof.PresentProofRequest
+import org.hyperledger.aries.api.present_proof.PresentationExchangeRecord
+import org.hyperledger.aries.api.present_proof.PresentationExchangeState
+import org.hyperledger.aries.api.present_proof.PresentationRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -31,13 +35,13 @@ data class Invitation(
 )
 
 fun currentTimeStr(): String {
-  val dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+  val dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
   val stringBuffer = StringBuffer()
   val now = Date()
 
   val simpleDateFormat = SimpleDateFormat(dateFormat)
   simpleDateFormat.format(now, stringBuffer, FieldPosition(0))
-  return stringBuffer.toString()
+  return stringBuffer.toString() + "000"
 }
 
 class FindyAriesClient(
@@ -51,9 +55,9 @@ class FindyAriesClient(
     private val testUserName: String =
         if (holder) "holder-" + System.currentTimeMillis()
         else "issuer-" + System.currentTimeMillis(),
-    private val testSeed: String =
-        System.getenv("SEED")
-            ?: "Z7wnGIbb6amj4mMGmkeCER5zD75VYYgC", // UUID.randomUUID().toString().substring(0,32),
+    private val testSeed: String = "",
+//        System.getenv("SEED")
+//            ?: "Z7wnGIbb6amj4mMGmkeCER5zD75VYYgC", // UUID.randomUUID().toString().substring(0,32),
     private val testKey: String =
         System.getenv("KEY") ?: "15308490f1e4026284594dd08d31291bc8ef2aeac730d0daf6ff87bb92d4336c",
     private val server: String = if (holder) "holder-acapy" else "issuer-verifier-acapy",
@@ -80,37 +84,85 @@ class FindyAriesClient(
     // Start listening status notifications
     GlobalScope.launch {
       connection.agentClient.listen().collect {
-        if (it.notification.typeID != Notification.Type.KEEPALIVE) {
-          println("Received from Agency:\n$it")
-        }
-
-        // connection -> INVITATION: ACTIVE
-        // issuer -> OFFER_SENT: CREDENTIAL_ACKED
-        // proof -> REQUEST_SENT: VERIFIED
-        val status = it.notification
-        when (status.typeID) {
-          Notification.Type.STATUS_UPDATE -> {
-            when (status.protocolType) {
-
-              // New connection established -> send greeting
-              Protocol.Type.DIDEXCHANGE -> {
-                val conn = ConnectionRecord()
-                conn.connectionId = status.connectionID
-                conn.updatedAt = currentTimeStr()
-                conn.state = ConnectionState.ACTIVE
-                publisher.handleConnection(conn)
-              }
-
-              // Message sent -> all ready, cancel streaming
-              /*Protocol.Type.BASIC_MESSAGE -> {
-                  currentCoroutineContext()[Job]?.cancel()
-              }*/
-              else -> println("no handler for protocol type: ${status.protocolType}")
+          // connection -> INVITATION: ACTIVE
+          // issuer -> OFFER_SENT: CREDENTIAL_ACKED
+          // proof -> REQUEST_SENT: VERIFIED
+          val status = it.notification
+          try {
+            if (it.notification.typeID != Notification.Type.KEEPALIVE) {
+              //println("$testUserName received from Agency:\n$it")
+                //println("$testUserName ${status.protocolType} ${status.role}")
             }
+
+            when (status.typeID) {
+              Notification.Type.STATUS_UPDATE -> {
+                  var protocolStatus = connection.protocolClient.status(status.protocolID)
+
+                  //println("$testUserName protocol status:\n$protocolStatus")
+
+                  if (protocolStatus.state.state == ProtocolState.State.OK) {
+                      when (status.protocolType) {
+
+                          // New connection established
+                          Protocol.Type.DIDEXCHANGE -> {
+                              if (status.role == Protocol.Role.ADDRESSEE) {
+                                  val conn = ConnectionRecord()
+                                  conn.connectionId = status.connectionID
+                                  conn.updatedAt = currentTimeStr()
+                                  conn.state = ConnectionState.ACTIVE
+                                  publisher.handleConnection(conn)
+                              }
+                          }
+
+                          Protocol.Type.ISSUE_CREDENTIAL -> {
+                              if (status.role == Protocol.Role.ADDRESSEE) {
+                                  val cred = V1CredentialExchange()
+                                  cred.credentialExchangeId = status.protocolID
+                                  cred.connectionId = status.connectionID
+                                  cred.updatedAt = currentTimeStr()
+                                  cred.state = CredentialExchangeState.CREDENTIAL_ACKED
+                                  cred.credentialOfferDict = V1CredentialExchange.CredentialOfferDict()
+                                  cred.credentialOfferDict.credentialPreview = V1CredentialExchange.CredentialProposalDict.CredentialProposal()
+                                  cred.credentialOfferDict.credentialPreview.attributes = ArrayList()
+                                  cred.credentialOfferDict.credentialPreview.attributes.add(
+                                      CredentialAttributes(
+                                          protocolStatus.issueCredential.attributes.getAttributes(0).name,
+                                          protocolStatus.issueCredential.attributes.getAttributes(0).value))
+                                  publisher.handleCredential(cred)
+                             }
+
+                          }
+
+                          Protocol.Type.PRESENT_PROOF -> {
+                              if (status.role == Protocol.Role.INITIATOR) {
+                                  val sessionId = protocolStatus.presentProof.proof.attributesList[0].value
+                                  val proof = PresentationExchangeRecord()
+                                  proof.presentationExchangeId = status.protocolID
+                                  proof.updatedAt = currentTimeStr()
+                                  proof.connectionId = status.connectionID
+                                  proof.state = PresentationExchangeState.VERIFIED
+                                  proof.presentationRequest = PresentProofRequest.ProofRequest()
+                                  proof.presentationRequest.name = "Expected to be valid (sessionId: $sessionId revocationRegistryId: null revocationRegistryIndexPrefix: null)"
+                                  proof.isVerified = true
+                                  //println("proof ok $proof")
+                                  publisher.handleProof(proof)
+                              }
+                          }
+
+                          else -> println("no handler for protocol type: ${status.protocolType}")
+                      }
+
+                  } else {
+                      println("NOK protocol status:\n$protocolStatus")
+                  }
+              }
+              else -> println("no handler for notification type: ${status.typeID}")
+            }
+          } catch (exp: Exception) {
+              println(exp)
           }
-          else -> println("no handler for notification type: ${status.typeID}")
-        }
       }
+
     }
   }
 
@@ -137,16 +189,17 @@ class FindyAriesClient(
           connection.agentClient.createSchema(
               name = schemaDo.name, attributes = schemaDo.attributes, version = schemaDo.version)
 
-      Thread.sleep(1_000 * 20)
+      Thread.sleep(1_000 * 30)
       val credDef = connection.agentClient.createCredDef(schemaId = schema.id, tag = "1.0")
       credDefId = credDef.id
-      Thread.sleep(1_000 * 20)
+      Thread.sleep(1_000 * 5)
     }
 
     return CredentialDefinitionDo(credDefId)
   }
 
   override fun createConnectionInvitation(alias: String): ConnectionInvitationDo {
+      //println("Creating invitation to $alias")
     var invitationType = ""
     var invitationId = ""
     var recipientKeys: List<String> = ArrayList<String>()
@@ -170,7 +223,7 @@ class FindyAriesClient(
     conn.state = ConnectionState.INVITATION
     publisher.handleConnection(conn)
 
-
+      //println("Invitation created to $alias")
     return ConnectionInvitationDo(
         invitationType, invitationId, recipientKeys, serviceEndpoint, label)
   }
@@ -184,18 +237,32 @@ class FindyAriesClient(
             serviceEndpoint = connectionInvitationDo.serviceEndpoint,
             label = connectionInvitationDo.label)
     val json = Gson().toJson(invitation)
+      //println("Receiving connection invitation $json")
     runBlocking {
       connection.protocolClient.connect(invitationURL = json, label = "FindyAriesClient")
     }
   }
 
   override fun issueCredentialToConnection(connectionId: String, credentialDo: CredentialDo) {
+      //println("Issuing credential to $connectionId")
     runBlocking {
-      connection.protocolClient.sendCredentialOffer(
+      val protocolID = connection.protocolClient.sendCredentialOffer(
           connectionId = connectionId,
           credDefId = credentialDo.credentialDefinitionId,
           attributes = credentialDo.claims,
       )
+        val cred = V1CredentialExchange()
+        cred.credentialExchangeId = protocolID.id
+        cred.connectionId = connectionId
+        cred.updatedAt = currentTimeStr()
+        cred.state = CredentialExchangeState.OFFER_SENT
+        cred.credentialOfferDict = V1CredentialExchange.CredentialOfferDict()
+        cred.credentialOfferDict.credentialPreview = V1CredentialExchange.CredentialProposalDict.CredentialProposal()
+        cred.credentialOfferDict.credentialPreview.attributes = ArrayList()
+        val firstName = credentialDo.claims.keys.first()
+        val firstValue = credentialDo.claims[firstName]
+        cred.credentialOfferDict.credentialPreview.attributes.add(CredentialAttributes(firstName, firstValue))
+        publisher.handleCredential(cred)
     }
   }
 
@@ -257,10 +324,19 @@ class FindyAriesClient(
                   name = it, credDefId = credentialRequestDo.credentialDefinitionIdRestriction)
             })
       }
-      connection.protocolClient.sendProofRequest(
+        val protocolID = connection.protocolClient.sendProofRequest(
           connectionId = connectionId,
           attributes = attributes,
       )
+        val proof = PresentationExchangeRecord()
+        proof.presentationExchangeId = protocolID.id
+        proof.updatedAt = currentTimeStr()
+        proof.connectionId = connectionId
+        proof.state = PresentationExchangeState.REQUEST_SENT
+        proof.presentationRequest = PresentProofRequest.ProofRequest()
+        proof.presentationRequest.name = comment.toString()
+        proof.isVerified = false
+        publisher.handleProof(proof)
     }
   }
 

@@ -150,7 +150,7 @@ class FullFlow(
                     )
                 )
             ),
-            true,
+            checkNonRevoked,
             comment
         )
     }
