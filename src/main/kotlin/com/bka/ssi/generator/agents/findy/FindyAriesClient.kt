@@ -105,7 +105,8 @@ class FindyAriesClient(
 
                           // New connection established
                           Protocol.Type.DIDEXCHANGE -> {
-                              if (status.role == Protocol.Role.ADDRESSEE) {
+                              // wait until connection response is handled
+                              if (status.role == Protocol.Role.INITIATOR) {
                                   val conn = ConnectionRecord()
                                   conn.connectionId = status.connectionID
                                   conn.updatedAt = currentTimeStr()

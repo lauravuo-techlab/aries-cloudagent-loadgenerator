@@ -6,7 +6,6 @@ services:
       - ./conf/genesis.txt:/genesis.txt
       - ./conf/steward.exported:/steward.exported
       - ./cert:/grpc
-      - .data/issuer/agent:/root
     environment:
       FCLI_POOL_GENESIS_TXN_FILE: "/genesis.txt"
       FCLI_AGENCY_GRPC_TLS: "true"
@@ -14,7 +13,7 @@ services:
       FCLI_AGENCY_HOST_ADDRESS: issuer-verifier-nginx
       FCLI_AGENCY_HOST_PORT: 10001
       FCLI_AGENCY_SERVER_PORT: 10001
-      FCLI_LOGGING: "-logtostderr -v=3"
+      FCLI_LOGGING: "-logtostderr -v=5"
       FCLI_AGENCY_REQUEST_TIMEOUT: "3m"
     ports:
       - "10001:10001"
@@ -61,17 +60,16 @@ services:
       - ./conf/genesis.txt:/genesis.txt
       - ./conf/steward.exported:/steward.exported
       - ./cert:/grpc
-      - .data/holder/agent:/root
     environment:
       FCLI_POOL_GENESIS_TXN_FILE: "/genesis.txt"
       FCLI_AGENCY_STEWARD_DID: ""
       FCLI_AGENCY_GRPC_TLS: "true"
       FCLI_AGENCY_GRPC_CERT_PATH: "/grpc"
       FCLI_AGENCY_GRPC_PORT: 50052
-      FCLI_AGENCY_HOST_ADDRESS: host.docker.internal
+      FCLI_AGENCY_HOST_ADDRESS: holder-acapy
       FCLI_AGENCY_HOST_PORT: 10011
       FCLI_AGENCY_SERVER_PORT: 10011
-      FCLI_LOGGING: "-logtostderr -v=3"
+      FCLI_LOGGING: "-logtostderr -v=5"
       FCLI_AGENCY_REQUEST_TIMEOUT: "3m"
     ports:
       - "10011:10011"
